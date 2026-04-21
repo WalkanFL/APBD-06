@@ -36,30 +36,36 @@ namespace APBD_06.Controllers
 
             var query = rooms.AsQueryable();
 
-            // Filtrowanie tekstowe - bezpieczne sprawdzenie null/empty
             if (!string.IsNullOrWhiteSpace(filter.Name))
+            {
                 query = query.Where(r => r.Name.Equals(filter.Name));
-
+            }
             if (!string.IsNullOrWhiteSpace(filter.BuildingCode))
+            {
                 query = query.Where(r => r.BuildingCode.Equals(filter.BuildingCode));
-
+            }
             if (filter.Id.HasValue)
+            {
                 query = query.Where(r => r.Id == filter.Id.Value);
-
+            }
             if (filter.Floor.HasValue)
+            {
                 query = query.Where(r => r.Floor == filter.Floor.Value);
-
+            }
             if (filter.minCapacity.HasValue)
+            {
                 query = query.Where(r => r.Capacity >= filter.minCapacity.Value);
-
+            }
             if (filter.HasProjector.HasValue)
+            {
                 query = query.Where(r => r.HasProjector == filter.HasProjector.Value);
-
+            }
             if (filter.activeOnly.HasValue)
+            {
                 query = query.Where(r => r.IsActive == filter.activeOnly.Value);
+            }
 
             var filteredRooms = query.ToList();
-            
 
             return filteredRooms.Any() ? Ok(filteredRooms) : NotFound();
         }

@@ -1,7 +1,19 @@
-﻿namespace APBD_06.DTOs;
+﻿using System.ComponentModel.DataAnnotations;
+using APBD_06.Models;
+
+namespace APBD_06.DTOs;
 
 public class ReservationFilterDTO
 {
-    
-    public bool isEmpty => true;
+    public int? Id { get; set; }
+    public int? RoomId { get; set; }
+    [MinLength(3)]
+    public string? OrganizerName { get; set; }
+    [MinLength(2)]
+    public string? Topic { get; set; }
+    public DateOnly?Date { get; set; }
+    public TimeOnly? StartTime { get; set; }
+    public TimeOnly? EndTime { get; set; }
+    public ReservationStatus? Status { get; set; }   
+    public bool isEmpty => Id == null &&RoomId == null && OrganizerName == null && Topic == null && Date == null & StartTime == null && EndTime == null && Status == null;
 }

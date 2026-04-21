@@ -32,9 +32,44 @@ namespace APBD_06.Controllers
                 return Ok(reservations);
             }
             
-            /* filtering */
+            var query = reservations.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(filter.OrganizerName))
+            {                
+                query = query.Where(r => r.OrganizerName.Equals(filter.OrganizerName));
+            }
+            if (!string.IsNullOrWhiteSpace(filter.Topic))
+            {
+                query = query.Where(r => r.Topic.Equals(filter.Topic));
+            }
+            if (filter.Id.HasValue)
+            {
+                query = query.Where(r => r.Id == filter.Id.Value);
+            }
+            if (filter.RoomId.HasValue)
+            {                 
+                query = query.Where(r => r.RoomId == filter.RoomId.Value);
+            }
+            if (filter.Date.HasValue)
+            {
+                query = query.Where(r => r.Date == filter.Date.Value);
+            }
+            if (filter.StartTime.HasValue)
+            {
+                query = query.Where(r => r.StartTime == filter.StartTime.Value);
+            }
+            if (filter.EndTime.HasValue)
+            {
+                query = query.Where(r => r.EndTime == filter.EndTime.Value);
+            }
+            if (filter.Status.HasValue)
+            {
+                query = query.Where(r => r.Status == filter.Status.Value);
+            }
             
-            return false ? Ok() : NotFound();
+            var filteredReservations = query.ToList();
+            
+            return filteredReservations.Any() ? Ok(filteredReservations) : NotFound();
 
         }
 
