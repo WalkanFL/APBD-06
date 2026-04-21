@@ -5,8 +5,7 @@ using System.Configuration;
 namespace APBD_06.DTOs;
 
 public class CreateReservationDTO
-{
-    public int Id { get; private set; }
+{ 
     public int RoomId { get; private set; }
     [MinLength(3)]
     public string OrganizerName { get; private set; }

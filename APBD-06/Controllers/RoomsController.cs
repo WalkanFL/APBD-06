@@ -20,9 +20,9 @@ namespace APBD_06.Controllers
             new Room(){Id = 5, BuildingCode = "N01", Capacity = 2, Floor = 4,HasProjector = true, IsActive = true, Name = "onThe27"}
         };
         
-        //GET api/rooms
+        //GET api/rooms?
         [HttpGet]
-        public IActionResult Get([FromQuery] RoomFilterDTO filter)
+        public IActionResult Get([FromQuery] RoomFilterDTO? filter)
         {
             if (!rooms.Any())
             {
@@ -92,6 +92,10 @@ namespace APBD_06.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] CreateRoomDTO createRoomDTO)
         {
+            if (validateRoomDTO(createRoomDTO).Equals(BadRequest()))
+            {
+                return BadRequest();
+            }
             var room = new Room()
             {
                 Id = rooms.Count + 1,
@@ -105,8 +109,7 @@ namespace APBD_06.Controllers
             };
             rooms.Add(room);
            //created;
-           //return CreatedAtAction("201 Created" ,room); //nie 
-           return Created("201 Created", room);
+           return CreatedAtAction("Post" ,room);
         }
         
         //PUT api/rooms/{id}
@@ -117,14 +120,19 @@ namespace APBD_06.Controllers
             {
                 return NotFound();
             }
-            
+
+            if (validateRoomDTO(createRoomDTO).Equals(BadRequest()))
+            {
+                return BadRequest();
+            }
+
             room.Name = createRoomDTO.Name;
             room.BuildingCode = createRoomDTO.BuildingCode;
             room.Floor = createRoomDTO.Floor;
             room.Capacity = createRoomDTO.Capacity;
             room.HasProjector = createRoomDTO.HasProjector;
             room.IsActive = createRoomDTO.IsActive;
-
+            
             return Ok();
         }
 
@@ -136,9 +144,31 @@ namespace APBD_06.Controllers
             {
                 return NotFound();
             }
+            
+            if (ReservationsController.reservations.Any(r => r.RoomId == id ))
+            {
+                //don't allow to delete rooms connected to reservations
+                //we want to keep rooms with prior reservations for datakeeping reasons | chcemy zachować sale z poprzednimi rezerwacjami dla spójności danych inaczej zrobilibyśmy jeszcze "&& (r.Status != ReservationStatus.DONE || r.Status != ReservationStatus.CANCELLED )"
+                return Conflict();
+            }
 
             rooms.Remove(room);
             return NoContent();
+        }
+
+        private IActionResult validateRoomDTO(CreateRoomDTO roomDTO)
+        {
+            if (string.IsNullOrWhiteSpace(roomDTO.Name) || string.IsNullOrWhiteSpace(roomDTO.BuildingCode))
+            {
+                return BadRequest();
+            }
+            /* //Attribute checks this
+            if (roomDTO.Capacity < 0)
+            {
+                return Conflict();
+            }*/
+            return Ok();
+
         }
 
     }

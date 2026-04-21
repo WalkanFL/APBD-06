@@ -1,3 +1,4 @@
+using APBD_06.DTOs;
 using APBD_06.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +18,115 @@ namespace APBD_06.Controllers
 
         };
         
+        //GET api/reservations?
+        [HttpGet]
+        public IActionResult Get([FromQuery] ReservationFilterDTO? filter)
+        {
+            if (!reservations.Any())
+            {
+                return NotFound();
+            }
+            
+            if (filter.isEmpty)
+            {
+                return Ok(reservations);
+            }
+            
+            /* filtering */
+            
+            return false ? Ok() : NotFound();
+
+        }
+
+        [HttpGet("{id:int}")]
+        public IActionResult Get([FromRoute] int id)
+        {
+            var reservation = reservations.Find(x => x.Id == id);
+            
+            if (reservation == null)
+            { 
+                return NotFound();
+            }
+            return Ok(reservation);
+        }
         
+        //POST api/reservations
+        [HttpPost]
+        public IActionResult Post([FromBody] CreateReservationDTO createReservationDTO)
+        {
+            if (validateReservation(createReservationDTO).Equals(BadRequest()))
+            {
+                return BadRequest();
+            }
+            
+            var reservation = new Reservation()
+            {
+                Id = reservations.Count + 1,
+                RoomId = createReservationDTO.RoomId,
+                OrganizerName = createReservationDTO.OrganizerName,
+                Topic = createReservationDTO.Topic,
+                Date = createReservationDTO.Date,
+                StartTime = createReservationDTO.StartTime,
+                EndTime = createReservationDTO.EndTime,
+                Status = createReservationDTO.Status
+                
+            };
+            reservations.Add(reservation);
+            return CreatedAtAction("Post",reservation);
+        }
         
+        //PUT api/reservations/{id}
+        [HttpPut("{id:int}")]
+        public IActionResult Put([FromBody] CreateReservationDTO createReservationDTO, [FromRoute] int id){
+            var reservation = reservations.Find(r => r.Id == id);
+            if (reservation == null)
+            {
+                return NotFound();
+            }
+
+            if (validateReservation(createReservationDTO).Equals(BadRequest()))
+            {
+                return BadRequest();
+            }
+
+            reservation.RoomId = createReservationDTO.RoomId;
+            reservation.OrganizerName = createReservationDTO.OrganizerName;
+            reservation.Topic = createReservationDTO.Topic;
+            reservation.Date = createReservationDTO.Date;
+            reservation.StartTime = createReservationDTO.StartTime;
+            reservation.EndTime = createReservationDTO.EndTime;
+            reservation.Status = createReservationDTO.Status;
+
+            return Ok();
+        }
+        
+        [HttpDelete("{id:int}")]
+        public IActionResult Delete([FromRoute] int id)
+        {
+            var reservation = reservations.Find(r => r.Id == id);
+            if (reservation == null)
+            {
+                return NotFound();
+            }
+
+            reservations.Remove(reservation);
+            return NoContent();
+        }
+
+        public IActionResult validateReservation(CreateReservationDTO reservationDTO)
+        {
+            if (string.IsNullOrWhiteSpace(reservationDTO.OrganizerName) || string.IsNullOrWhiteSpace(reservationDTO.Topic))
+            {
+                return BadRequest();
+            }
+
+            if (reservationDTO.StartTime > reservationDTO.EndTime)
+            {
+                return BadRequest();
+            }
+
+            return Ok();
+        }
+
     }
 }

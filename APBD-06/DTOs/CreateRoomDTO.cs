@@ -5,8 +5,6 @@ namespace APBD_06.DTOs;
 
 public class CreateRoomDTO
 {
-    
-    public int Id { get; set; }
     [StringLength(128)]
     [MinLength(3)]
     public string Name { get; set; } = String.Empty;
