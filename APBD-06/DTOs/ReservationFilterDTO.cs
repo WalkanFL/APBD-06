@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using APBD_06.Models;
+﻿using APBD_06.Models;
 
 namespace APBD_06.DTOs;
 
@@ -7,9 +6,7 @@ public class ReservationFilterDTO
 {
     public int? Id { get; set; }
     public int? RoomId { get; set; }
-    [MinLength(3)]
     public string? OrganizerName { get; set; }
-    [MinLength(2)]
     public string? Topic { get; set; }
     public DateOnly?Date { get; set; }
     public TimeOnly? StartTime { get; set; }

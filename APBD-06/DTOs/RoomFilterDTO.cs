@@ -1,15 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Configuration;
+﻿using System.Configuration;
 
 namespace APBD_06.DTOs;
 
 public class RoomFilterDTO
 {
     public int? Id { get; set; }
-    [StringLength(128)]
-    [MinLength(3)]
     public string? Name { get; set; } = String.Empty;
-    [StringLength(5)]
     public string? BuildingCode { get; set; }
     public int? Floor { get; set; }
     [IntegerValidator(MinValue = 1)]

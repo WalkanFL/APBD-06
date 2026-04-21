@@ -82,10 +82,10 @@ namespace APBD_06.Controllers
             return Ok(room);
         }
         
-        [HttpGet("building/{buildingCode:string}")]
+        [HttpGet("building/{buildingCode}")]
         public IActionResult GetForBuilding([FromRoute] string buildingCode)
         {
-            var room = rooms.Find(x => x.BuildingCode.Equals(buildingCode));
+            var room = rooms.Where(x => x.BuildingCode.Equals(buildingCode)).ToList();
             
             if (room == null)
             { 
@@ -139,7 +139,7 @@ namespace APBD_06.Controllers
             room.HasProjector = createRoomDTO.HasProjector;
             room.IsActive = createRoomDTO.IsActive;
             
-            return Ok();
+            return Ok(room);
         }
 
         [HttpDelete("{id:int}")]

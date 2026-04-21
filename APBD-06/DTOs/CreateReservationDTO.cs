@@ -6,13 +6,13 @@ namespace APBD_06.DTOs;
 
 public class CreateReservationDTO
 { 
-    public int RoomId { get; private set; }
+    public int RoomId { get; set; }
     [MinLength(3)]
-    public string OrganizerName { get; private set; }
+    public string OrganizerName { get; set; }
     [MinLength(2)]
-    public string Topic { get; private set; }
-    public DateOnly Date { get; private set; }
-    public TimeOnly StartTime { get; private set; }
-    public TimeOnly EndTime { get; private set; }
-    public ReservationStatus Status { get; private set; }
+    public string Topic { get;  set; }
+    public DateOnly Date { get; set; }
+    public TimeOnly StartTime { get; set; }
+    public TimeOnly EndTime { get; set; }
+    public ReservationStatus Status { get; set; }
 }

@@ -18,6 +18,7 @@ namespace APBD_06.Controllers
 
         };
         
+        
         //GET api/reservations?
         [HttpGet]
         public IActionResult Get([FromQuery] ReservationFilterDTO? filter)
@@ -132,7 +133,7 @@ namespace APBD_06.Controllers
             reservation.EndTime = createReservationDTO.EndTime;
             reservation.Status = createReservationDTO.Status;
 
-            return Ok();
+            return Ok(reservation);
         }
         
         [HttpDelete("{id:int}")]
@@ -159,6 +160,17 @@ namespace APBD_06.Controllers
             {
                 return BadRequest();
             }
+
+            var check = reservations.Find(r => r.Date.Equals(reservationDTO.Date) && r.RoomId == reservationDTO.RoomId );
+            if (check != null)
+                if ( //is fully before
+                    !(check.StartTime > reservationDTO.EndTime) ||
+                    //is fully after
+                    !(check.EndTime < reservationDTO.StartTime)
+                )
+                {
+                    return BadRequest();
+                }
 
             return Ok();
         }
