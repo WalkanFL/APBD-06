@@ -2,6 +2,7 @@ using APBD_06.DTOs;
 using APBD_06.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace APBD_06.Controllers
 {
@@ -13,19 +14,54 @@ namespace APBD_06.Controllers
         {
             new Room(){Id = 0, BuildingCode = "241", Capacity = 2, Floor = 1,HasProjector = true, IsActive = true, Name = "kagura"},
             new Room(){Id = 1, BuildingCode = "241", Capacity = 2, Floor = 2,HasProjector = true, IsActive = true, Name = "bachi"},
-            new Room(){Id = 2, BuildingCode = "241", Capacity = 2, Floor = 1,HasProjector = true, IsActive = true, Name = "kgra"}
+            new Room(){Id = 2, BuildingCode = "241", Capacity = 2, Floor = 1,HasProjector = true, IsActive = true, Name = "kgra"},
+            new Room(){Id = 3, BuildingCode = "A50", Capacity = 1, Floor = 3,HasProjector = false, IsActive = false, Name = "anime"},
+            new Room(){Id = 4, BuildingCode = "B15", Capacity = 3, Floor = 1,HasProjector = false, IsActive = true, Name = "announcement"},
+            new Room(){Id = 5, BuildingCode = "N01", Capacity = 2, Floor = 4,HasProjector = true, IsActive = true, Name = "onThe27"}
         };
         
         //GET api/rooms
         [HttpGet]
-        public IActionResult Get()
+        public IActionResult Get([FromQuery] RoomFilterDTO filter)
         {
-            if (rooms.Count == 0)
+            if (!rooms.Any())
             {
-                return NoContent();
+                return NotFound();
             }
-            return Ok(rooms); 
+
+            if (filter.isEmpty)
+            {
+                return Ok(rooms);
+            }
+
+            var query = rooms.AsQueryable();
+
+            // Filtrowanie tekstowe - bezpieczne sprawdzenie null/empty
+            if (!string.IsNullOrWhiteSpace(filter.Name))
+                query = query.Where(r => r.Name.Equals(filter.Name));
+
+            if (!string.IsNullOrWhiteSpace(filter.BuildingCode))
+                query = query.Where(r => r.BuildingCode.Equals(filter.BuildingCode));
+
+            if (filter.Id.HasValue)
+                query = query.Where(r => r.Id == filter.Id.Value);
+
+            if (filter.Floor.HasValue)
+                query = query.Where(r => r.Floor == filter.Floor.Value);
+
+            if (filter.minCapacity.HasValue)
+                query = query.Where(r => r.Capacity >= filter.minCapacity.Value);
+
+            if (filter.HasProjector.HasValue)
+                query = query.Where(r => r.HasProjector == filter.HasProjector.Value);
+
+            if (filter.activeOnly.HasValue)
+                query = query.Where(r => r.IsActive == filter.activeOnly.Value);
+
+            var filteredRooms = query.ToList();
             
+
+            return filteredRooms.Any() ? Ok(filteredRooms) : NotFound();
         }
         //GET api/rooms/{id}
         [HttpGet("{id:int}")]
@@ -41,7 +77,7 @@ namespace APBD_06.Controllers
         }
         
         [HttpGet("building/{buildingCode:string}")]
-        public IActionResult Get([FromRoute] string buildingCode)
+        public IActionResult GetForBuilding([FromRoute] string buildingCode)
         {
             var room = rooms.Find(x => x.BuildingCode.Equals(buildingCode));
             
@@ -67,11 +103,43 @@ namespace APBD_06.Controllers
                 IsActive = createRoomDTO.IsActive,
                 
             };
-            
+            rooms.Add(room);
            //created;
-           return CreatedAtAction()
+           //return CreatedAtAction("201 Created" ,room); //nie 
+           return Created("201 Created", room);
+        }
+        
+        //PUT api/rooms/{id}
+        [HttpPut("{id:int}")]
+        public IActionResult Put([FromBody] CreateRoomDTO createRoomDTO, [FromRoute] int id){
+            var room = rooms.Find(r => r.Id == id);
+            if (room == null)
+            {
+                return NotFound();
+            }
+            
+            room.Name = createRoomDTO.Name;
+            room.BuildingCode = createRoomDTO.BuildingCode;
+            room.Floor = createRoomDTO.Floor;
+            room.Capacity = createRoomDTO.Capacity;
+            room.HasProjector = createRoomDTO.HasProjector;
+            room.IsActive = createRoomDTO.IsActive;
+
+            return Ok();
         }
 
+        [HttpDelete("{id:int}")]
+        public IActionResult Delete([FromRoute] int id)
+        {
+            var room = rooms.Find(r => r.Id == id);
+            if (room == null)
+            {
+                return NotFound();
+            }
+
+            rooms.Remove(room);
+            return NoContent();
+        }
 
     }
 }
